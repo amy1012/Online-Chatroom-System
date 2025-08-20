@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聊天室</title>
+</head>
+<body>
+  <h1>聊天室</h1>
+  <ul id="message-container"></ul>
+  <form id="message-form">
+    <input type="text" id="message-input" placeholder="輸入訊息..." required>
+    <button type="submit">送出</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const messageContainer = document.getElementById('message-container');
+
+    const user = JSON.parse(localStorage.getItem('user')) || { _id: null, username: 'anonymous' };
+
+    messageForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = {
+        username: user.username,
+        message: messageInput.value,
+        userId: user._id,
+      };
+      socket.emit('message', data);
+      addMessageToUI(true, data);
+      messageInput.value = '';
+    });
+
+    socket.on('load-messages', (messages) => {
+      messages.forEach((msg) => {
+        addMessageToUI(msg.userId === user._id, msg);
+      });
+    });
+
+    socket.on('chat-message', (data) => {
+      addMessageToUI(data.userId === user._id, data);
+    });
+
+    function addMessageToUI(isOwnMessage, data) {
+      const element = document.createElement('li');
+      element.textContent = `${data.username}: ${data.message}`;
+      element.style.textAlign = isOwnMessage ? 'right' : 'left';
+      messageContainer.appendChild(element);
+    }
+  </script>
+</body>
+</html>

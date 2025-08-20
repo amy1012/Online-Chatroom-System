@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登入頁面</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .login-container {
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        width: 300px;
+      }
+
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #5cb85c;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #4cae4c;
+      }
+
+      .message {
+        text-align: center;
+        color: red;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>登入</h2>
+      <form id="login-form">
+        <input
+          type="email"
+          id="email"
+          placeholder="輸入你的 Email"
+          required
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="輸入你的密碼"
+          required
+        />
+        <button type="submit">登入</button>
+      </form>
+      <a href="register.html">已有帳號？前往登入</a>
+      <div class="message" id="message"></div>
+    </div>
+
+    <script>
+      const form = document.getElementById("login-form");
+      const messageDiv = document.getElementById("message");
+
+      form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    const apiBaseURL = ' https://e38a-2403-c300-d00b-7f07-e00c-4fac-d8c4-3ce2.ngrok-free.app';
+
+    const response = await fetch(`${apiBaseURL}/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("user", JSON.stringify({
+        userId: data.user.userId,  // 保存 userId
+        username: data.user.username,
+      }));
+
+      console.log("登入成功，保存用戶資料:", data.user);
+      window.location.href = "index.html"; // 導向聊天室頁面
+    } else {
+      alert(data.error || "登入失敗");
+    }
+  } catch (err) {
+    console.error("登入失敗:", err);
+    alert("伺服器錯誤，請稍後再試");
+  }
+});
+
+    </script>
+  </body>
+</html>
